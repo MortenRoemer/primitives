@@ -14,6 +14,12 @@
         <Description>A library of alternatives and extensions to strings with focus on high-performance and low allocation overhead</Description>
         <PackageProjectUrl>https://github.com/MortenRoemer/primitives</PackageProjectUrl>
         <RepositoryUrl>https://github.com/MortenRoemer/primitives</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+    
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
 </Project>
