@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <IsAotCompatible>true</IsAotCompatible>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>MortenRoemer.Primitives.Text</Title>
+        <Authors>Morten Römer</Authors>
+        <Copyright>2025</Copyright>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Description>A library of alternatives and extensions to strings with focus on high-performance and low allocation overhead</Description>
+        <PackageProjectUrl>https://github.com/MortenRoemer/primitives</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/MortenRoemer/primitives</RepositoryUrl>
+    </PropertyGroup>
+
+</Project>

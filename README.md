@@ -1,2 +1,2 @@
 # primitives
-Better C# primitives to model data classes
+Alternatives to C# standard library classes to take better advantage of newer .NET developments

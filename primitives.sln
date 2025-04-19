@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MortenRoemer.Primitives.Text", "MortenRoemer.Primitives.Text\MortenRoemer.Primitives.Text.csproj", "{BA7E9591-7504-4F3D-BF15-E11E845741CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{B33FE2C0-BE29-474F-903C-E738BCA734EC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BA7E9591-7504-4F3D-BF15-E11E845741CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA7E9591-7504-4F3D-BF15-E11E845741CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA7E9591-7504-4F3D-BF15-E11E845741CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA7E9591-7504-4F3D-BF15-E11E845741CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B33FE2C0-BE29-474F-903C-E738BCA734EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B33FE2C0-BE29-474F-903C-E738BCA734EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B33FE2C0-BE29-474F-903C-E738BCA734EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B33FE2C0-BE29-474F-903C-E738BCA734EC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
