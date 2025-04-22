@@ -1,10 +1,13 @@
-﻿namespace MortenRoemer.Primitives.Text.Exception;
+﻿using MortenRoemer.ThreadSafety;
+
+namespace MortenRoemer.Primitives.Text.Exception;
 
 /// <summary>
 /// An exception that is thrown by <see cref="ConstrainedString{TConstraint}"/> if any exception occurs
 /// during the constraint verification process itself. It should always indicate some kind of developer error
 /// and should not occur in production.
 /// </summary>
+[ExclusiveMemoryAccess(Reason = "All exceptions are mutable through their base class")]
 public sealed class VerificationFailedException : System.Exception
 {
     /// <summary>

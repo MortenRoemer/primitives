@@ -1,10 +1,14 @@
-﻿namespace MortenRoemer.Primitives.Text;
+﻿using MortenRoemer.ThreadSafety;
+
+namespace MortenRoemer.Primitives.Text;
 
 /// <summary>
 /// Contains extension methods to define pipelines, that means sequential actions against a string, that are
 /// executed against a buffer to prevent frequent allocations.
 /// For example <see cref="TransformPipeline(string, Action{CharBuffer})"/>
 /// </summary>
+[SynchronizedMemoryAccess(Reason = "extension methods are also used in multi-threading scenarios. " +
+                                   "All mutable values should therefore be synchronized.")]
 public static class TransformPipelineExtension
 {
     /// <summary>

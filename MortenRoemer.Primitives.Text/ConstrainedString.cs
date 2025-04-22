@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using MortenRoemer.Primitives.Text.Exception;
+using MortenRoemer.ThreadSafety;
 
 namespace MortenRoemer.Primitives.Text;
 
@@ -15,6 +16,8 @@ namespace MortenRoemer.Primitives.Text;
 /// var identifier = ConstrainedString&lt;AsciiIdentifierConstraint&gt;.Create("core_name");
 /// </code>
 /// </example>
+[ImmutableMemoryAccess(Reason = "This type is immutable by design to be as close to a standard library string as " +
+                                "possible")]
 public readonly struct ConstrainedString<TConstraint> : IEquatable<ConstrainedString<TConstraint>>
     where TConstraint : IStringConstraint
 {

@@ -1,9 +1,12 @@
-﻿namespace MortenRoemer.Primitives.Text.Exception;
+﻿using MortenRoemer.ThreadSafety;
+
+namespace MortenRoemer.Primitives.Text.Exception;
 
 /// <summary>
 /// An Exception that should be thrown, if a <see cref="IStringConstraint"/> was not satisfied and the process is
 /// unable to continue.
 /// </summary>
+[ExclusiveMemoryAccess(Reason = "All exceptions are mutable through their base class")]
 public sealed class ConstraintFailedException : System.Exception
 {
     /// <summary>

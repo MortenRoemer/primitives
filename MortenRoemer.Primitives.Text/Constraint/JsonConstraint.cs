@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using MortenRoemer.ThreadSafety;
 
 namespace MortenRoemer.Primitives.Text.Constraint;
 
@@ -13,10 +14,10 @@ namespace MortenRoemer.Primitives.Text.Constraint;
 /// JsonConstraint.Verify("{}");
 /// </code>
 /// </example>
+[ImmutableMemoryAccess(Reason = "These constraints should not use any shared resources as they are frequently used " +
+                                "over multiple threads and even synchronization might add considerable overhead")]
 public abstract class JsonConstraint : IStringConstraint
 {
-    private const string Message = "JSON files must conform to the specification of the JSON format without comments";
-
     private JsonConstraint()
     {
         // this class my never be instantiated

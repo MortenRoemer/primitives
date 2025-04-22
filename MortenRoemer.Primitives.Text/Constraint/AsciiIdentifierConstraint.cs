@@ -1,4 +1,6 @@
-﻿namespace MortenRoemer.Primitives.Text.Constraint;
+﻿using MortenRoemer.ThreadSafety;
+
+namespace MortenRoemer.Primitives.Text.Constraint;
 
 /// <summary>
 /// A predefined <see cref="IStringConstraint"/> to be used in <see cref="ConstrainedString{TConstraint}"/>.
@@ -14,6 +16,8 @@
 /// AsciiIdentifierConstraint.Verify("Lorum Ipsum"); // false, because it contains whitespace
 /// </code>
 /// </example>
+[ImmutableMemoryAccess(Reason = "These constraints should not use any shared resources as they are frequently used " +
+                                "over multiple threads and even synchronization might add considerable overhead")]
 public abstract class AsciiIdentifierConstraint : IStringConstraint
 {
     private const string Message = "ascii identifiers may not be empty and only contain ascii letters, digits or underscores";

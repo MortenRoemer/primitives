@@ -1,4 +1,6 @@
-﻿namespace MortenRoemer.Primitives.Text;
+﻿using MortenRoemer.ThreadSafety;
+
+namespace MortenRoemer.Primitives.Text;
 
 /// <summary>
 /// Represents a result of a constraint verification handled by instances of <see cref="IStringConstraint"/>.
@@ -15,6 +17,8 @@
 /// var negativeResult = ConstraintResult.Deny("e-mail-addresses may not contain whitespace", 3);
 /// </code>
 /// </example>
+[ImmutableMemoryAccess(Reason = "This type should only be generated once per verification and then be reused. " +
+                                "This is only safely possible with immutable structs")]
 public readonly struct ConstraintResult
 {
     private ConstraintResult(bool accepted, string? message, int? index)

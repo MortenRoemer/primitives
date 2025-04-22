@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Globalization;
+using MortenRoemer.ThreadSafety;
 
 namespace MortenRoemer.Primitives.Text;
 
@@ -12,9 +13,11 @@ namespace MortenRoemer.Primitives.Text;
 /// <remarks>
 /// It is recommended to avoid <see cref="System.Text.StringBuilder"/> instances while working with large strings
 /// as the implementation uses a linked list of chunks. That implementation was good enough if you consider that
-/// .NET didn't had any efficient way of handling large chunks of consecutive memory. After the introduction of the
+/// .NET didn't have any efficient way of handling large chunks of consecutive memory. After the introduction of the
 /// Large-Object-Heap it is almost always recommended to use <see cref="CharBuffer"/> instead.
 /// </remarks>
+[ExclusiveMemoryAccess(Reason = "This type is easily mutable by design. Any multi-threading could lead to undefined " +
+                                "behavior and allocation errors")]
 public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
 {
     private const int MinCapacityIncrement = 128;
@@ -184,18 +187,20 @@ public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
     /// <param name="provider">optionally, the format provider to use. e.g. <see cref="CultureInfo.InvariantCulture"/></param>
     /// <typeparam name="TValue">The type of value to append</typeparam>
     /// <returns>a reference to this instance to chain calls together</returns>
-    /// <exception cref="ArgumentException">The formatted value is longer than 256 characters long</exception>
     public CharBuffer Append<TValue>(TValue value, ReadOnlySpan<char> format, IFormatProvider? provider = null)
         where TValue : ISpanFormattable
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(CharBuffer));
-        
-        Span<char> valueBuffer = stackalloc char[AllocationLimit.InChars];
 
-        if (!value.TryFormat(valueBuffer, out var charsWritten, format, provider))
-            throw new ArgumentException($"value is longer than {AllocationLimit.InChars} UTF-16 codepoints");
+        int charsWritten;
+
+        while (!value.TryFormat(AvailableBuffer, out charsWritten, format, provider))
+        {
+            EnsureCapacity(Capacity + AllocationLimit.InChars);
+        }
         
-        return Append(valueBuffer[..charsWritten]);
+        _length += charsWritten;
+        return this;
     }
 
     /// <summary>
@@ -309,7 +314,7 @@ public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
     }
 
     /// <summary>
-    /// Generates a hash based on the content of this instance. Please note that this hashcode will change everytime
+    /// Generates a hash based on the content of this instance. Please note that this hashcode will change every time
     /// the content of this instance changes.
     /// </summary>
     /// <returns>a hashcode based on the current content of this instance</returns>
@@ -325,7 +330,7 @@ public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
         
         foreach (var character in AsSpan)
         {
-            BitConverter.TryWriteBytes(buffer, character); // process always succeeds
+            BitConverter.TryWriteBytes(buffer, character); // this process always succeeds
 
             hash ^= buffer[0];
             hash *= prime;
@@ -346,7 +351,7 @@ public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
     /// and returns its index
     /// </summary>
     /// <param name="character">The UTF-16 codepoint to search for</param>
-    /// <returns>the zero-based index of the first occurrence of the specified character; otherwise, null</returns>
+    /// <returns>the zero-based index of the specified character; otherwise, null</returns>
     public int? IndexOf(char character)
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(CharBuffer));
@@ -360,7 +365,7 @@ public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
     /// and returns its index 
     /// </summary>
     /// <param name="substring">The string to search for</param>
-    /// <returns>the zero-based index of the first occurrence of the specified substring; otherwise, null</returns>
+    /// <returns>the zero-based index of the specified substring; otherwise, null</returns>
     public int? IndexOf(ReadOnlySpan<char> substring)
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(CharBuffer));
@@ -376,7 +381,7 @@ public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
     /// <param name="index">The zero-based index to insert the character</param>
     /// <param name="character">The UTF-16 codepoint to insert</param>
     /// <returns>a reference to this instance to chain calls together</returns>
-    /// <exception cref="ArgumentOutOfRangeException">index is less than 0 or larger than length</exception>
+    /// <exception cref="ArgumentOutOfRangeException">the index is less than 0 or larger than length</exception>
     public CharBuffer Insert(int index, char character)
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(CharBuffer));
@@ -398,7 +403,7 @@ public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
     /// <param name="index">The zero-based index to insert the text</param>
     /// <param name="text">The text to insert</param>
     /// <returns>a reference to this instance to chain calls together</returns>
-    /// <exception cref="ArgumentOutOfRangeException">index is less than 0 or larger than length</exception>
+    /// <exception cref="ArgumentOutOfRangeException">the index is less than 0 or larger than length</exception>
     public CharBuffer Insert(int index, ReadOnlySpan<char> text)
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(CharBuffer));
@@ -510,10 +515,10 @@ public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
     }
 
     /// <summary>
-    /// Removes the specified amount of characters from this instance starting at the specified index.
+    /// Removes the specified number of characters from this instance starting at the specified index.
     /// </summary>
     /// <param name="startIndex">the zero-based index to start removing from</param>
-    /// <param name="count">optionally, the amount of characters to remove with the rest of the buffer as a default</param>
+    /// <param name="count">optionally, the number of characters to remove with the rest of the buffer as a default</param>
     /// <returns>a reference to this instance to chain calls together</returns>
     /// <exception cref="ArgumentOutOfRangeException">if either startIndex or count are out of the valid range</exception>
     public CharBuffer Remove(int startIndex, int? count = null)
@@ -586,7 +591,7 @@ public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
     /// Determines if this instance starts with the specified character.
     /// </summary>
     /// <param name="character">The UTF-16 codepoint to check against</param>
-    /// <returns>true, if this instance starts with the character; otherwise false</returns>
+    /// <returns>true, if this instance starts with the character. otherwise false</returns>
     public bool StartsWith(char character)
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(CharBuffer));
@@ -598,7 +603,7 @@ public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
     /// Determines if this instance starts with the specified text.
     /// </summary>
     /// <param name="text">The substring to check against</param>
-    /// <returns>true, if this instance starts with the substring; otherwise false</returns>
+    /// <returns>true, if this instance starts with the substring. otherwise false</returns>
     public bool StartsWith(ReadOnlySpan<char> text)
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(CharBuffer));
@@ -609,7 +614,7 @@ public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
     /// <summary>
     /// Extracts the specified substring from this instance.
     /// </summary>
-    /// <param name="startIndex">The zero-based index of the start of the substring</param>
+    /// <param name="startIndex">The zero-based index of the substring</param>
     /// <param name="count">optionally, the amount of characters the substring consists of with the rest as a default</param>
     /// <returns>The substring as its own <see cref="string"/> instance</returns>
     /// <exception cref="ArgumentOutOfRangeException">either startIndex or count are not in a valid range</exception>
@@ -814,7 +819,7 @@ public sealed class CharBuffer : IDisposable, IEquatable<CharBuffer>
     /// </summary>
     /// <param name="instance">the instance to convert</param>
     /// <returns>This instance as a string</returns>
-    public static implicit operator string(CharBuffer instance)
+    public static explicit operator string(CharBuffer instance)
         => instance.ToString();
     
     /// <summary>

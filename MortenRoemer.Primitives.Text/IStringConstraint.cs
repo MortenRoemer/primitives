@@ -1,5 +1,6 @@
 ﻿using MortenRoemer.Primitives.Text.Constraint;
 using MortenRoemer.Primitives.Text.Exception;
+using MortenRoemer.ThreadSafety;
 
 namespace MortenRoemer.Primitives.Text;
 
@@ -22,6 +23,8 @@ namespace MortenRoemer.Primitives.Text;
 ///     </item>
 /// </list>
 /// </summary>
+[ImmutableMemoryAccess(Reason = "These constraints should not use any shared resources as they are frequently used " +
+                                "over multiple threads and even synchronization might add considerable overhead")]
 public interface IStringConstraint
 {
     /// <summary>
